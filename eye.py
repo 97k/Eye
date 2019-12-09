@@ -6,6 +6,7 @@ import pandas as pd
 
 df = pd.DataFrame()
 
+
 def findThreshold(img):
     threshold = 20
     params = cv2.SimpleBlobDetector_Params()
@@ -16,17 +17,17 @@ def findThreshold(img):
     detector = cv2.SimpleBlobDetector_create(params)
 
     while threshold <= 60:
+        threshold += 10
         _, thrash = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
         keypoints = detector.detect(thrash)
         # print("keypoints", len(keypoints))
 
         if len(keypoints) >= 2:
             break
-        threshold += 10
 
     else:
         return -1, False
-    threshold = threshold -10 if threshold >= 50 else threshold
+    threshold = threshold - 10 if threshold >= 50 else threshold
     return threshold, True
 
 
@@ -37,7 +38,7 @@ def check_and_write_text(frame, pupil_consec, pupil_flag):
     return pupil_consec, pupil_flag
 
 
-cap = cv2.VideoCapture('../video3(1).mp4')
+cap = cv2.VideoCapture('../video4(1).mp4')
 pupil_flag = False
 smax_contour = None
 pupil_consec = 0
@@ -50,7 +51,7 @@ check_blink = False
 nblinks = 0
 blink_flag = False
 threshold_flag = False
-out = cv2.VideoWriter('result_vid3.avi', cv2.VideoWriter_fourcc(*'XVID'), 29.0, (int(cap.get(3)),int(cap.get(4))))
+out = cv2.VideoWriter('result_vid4.avi', cv2.VideoWriter_fourcc(*'XVID'), 29.0, (int(cap.get(3)), int(cap.get(4))))
 
 print('setting threshold...')
 while True:
@@ -117,10 +118,6 @@ while True:
 
         cv2.putText(frame, 'Blinks: ' + str(nblinks), (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
 
-    # if len(contours) > 2:
-    #     contours_s = sorted(contours, key=lambda x: cv2.contourArea(x))
-    #     smax_contour = cv2.contourArea(contours_s[-3])
-    # # print(smax_contour, ' is the second max contour')
     if len(contours) == 0:
         pupil_consec, pupil_flag = check_and_write_text(frame, pupil_consec + 1, True)
 
@@ -134,8 +131,7 @@ while True:
         # cv2.drawContours(frame, [contour], -1, (0, 255, 0), 1)
         approx = cv2.approxPolyDP(contour, 3, True)
         area = cv2.contourArea(contour)
-        # if not smax_contour: smax_contour = 2000
-        # print('area of frame', area, 'num lines : ', len(approx))
+
         if len(approx) >= 6 and 2000 <= area:
 
             peri = cv2.arcLength(contour, True)
@@ -149,13 +145,16 @@ while True:
                 cv2.circle(frame, (int(center[0]), int(center[1])), int(radius), (0, 0, 255), 2)
             else:
                 pupil_temp += 1
+                pupil_consec += 1
+                pupil_flag = True
+                # pupil_flag, pupil_consec = check_and_write_text(frame, pupil_consec, pupil_flag)
 
         else:
             # print('In else of contour plotting, ', area, len(approx))
-            # if len(approx) < 6:
             pupil_temp += 1
-            #     pupil_flag = True
-            #     pupil_consec, pupil_flag = check_and_write_text(frame, pupil_consec, pupil_flag)
+            pupil_flag = True
+            pupil_consec, pupil_flag = check_and_write_text(frame, pupil_consec, pupil_flag)
+
     if pupil_temp >= len(contours) - 3:
         pupil_consec, pupil_flag = check_and_write_text(frame, pupil_consec + 1, True)
 
