@@ -1,4 +1,4 @@
-#Eye
+# Eye
 
 Tracks the eye pupil's movement and effectively detects the blinking of eye. Blinking of eye can be easily detected when eye(facial) landmarks are available, Eye is a computer vision application which can effectively tracks the pupil and find the eye blinking based on heuristics powered by data.
 
